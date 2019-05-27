@@ -1,29 +1,67 @@
 <template>
   <div id="app">
     <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <div class="nav-title">DraftTrainer™</div>
+      <div class="router-links-container">
+        <router-link to="/">Home</router-link> |
+        <router-link to="/about">About</router-link>
+      </div>
     </div>
     <router-view/>
   </div>
 </template>
 
+<script>
+  const fetch = require('node-fetch');
+  import pbConfig from "./pb-config";
+  import store from './store';
+  
+  export default {
+    name: 'app',
+    methods: {
+      getChampData: () => {
+        let champDataUrl = "http://ddragon.leagueoflegends.com/cdn/" + pbConfig.version + "/data/en_US/champion.json";
+        fetch(champDataUrl)
+          .then(res => res.json())
+          .then(json => store.commit('setChampData', json.data));
+      }
+    },
+    created(){
+      this.getChampData();
+    }
+  }
+</script>
+
 <style lang="scss">
+@import "./css/global";
+
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  color: #fff;
 }
 #nav {
-  padding: 30px;
+  background: $blue3;
+  text-align: center;
+  padding: 5px;
   a {
     font-weight: bold;
-    color: #2c3e50;
+    color: $blue1;
+    text-decoration: none;
     &.router-link-exact-active {
-      color: #42b983;
+      color: $white;
+      text-decoration: none;
     }
   }
+}
+
+.nav-title{
+  font-size: 1.2em;
+  display: inline-block;
+}
+
+.router-links-container{
+  float: right;
 }
 </style>
