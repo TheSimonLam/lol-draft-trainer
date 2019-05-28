@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="nav">
-      <div class="nav-title">DraftTrainer™</div>
+      <div class="nav-title">🔵DraftTrainer™🔴</div>
       <div class="router-links-container">
         <router-link to="/">Home</router-link> |
         <router-link to="/about">About</router-link>
@@ -40,6 +40,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #fff;
+  text-align: center;
 }
 #nav {
   background: $blue3;
@@ -62,6 +63,8 @@
 }
 
 .router-links-container{
-  float: right;
+  position: absolute;
+  top: 5px;
+  right: 10px;
 }
 </style>
