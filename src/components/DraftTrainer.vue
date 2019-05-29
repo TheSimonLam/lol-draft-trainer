@@ -58,7 +58,7 @@ export default {
   },
   data(){
     return {
-      playing: true, //TODO: SET THIS BACK TO FALSE!,
+      playing: false, //TODO: SET THIS BACK TO FALSE!,
       sideSelected: false
     }
   },
