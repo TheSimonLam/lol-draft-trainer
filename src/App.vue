@@ -58,8 +58,10 @@
 }
 
 .nav-title{
-  font-size: 1.2em;
-  display: inline-block;
+    font-size: 1.2em;
+    display: inline-block;
+    border-radius: 5px;
+    padding-bottom: 5px;
 }
 
 .router-links-container{

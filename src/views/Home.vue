@@ -18,6 +18,6 @@ export default {
 
 <style>
 .home{
-  padding-top: 50px;
+  padding: 20px 10% 0 10%;
 }
 </style>

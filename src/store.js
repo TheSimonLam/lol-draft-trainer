@@ -6,19 +6,35 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     champData: {},
-    red: {},
-    blue: {}
+    playerSide: 'blue',
+    enemySide: 'red'
   },
   mutations: {
     setChampData (state, champData) {
       state.champData = champData;
     },
-    setSelectedChamps (state, selectedChampData) {
-      state[selectedChampData.side][selectedChampData.role] = selectedChampData.champName;
-    },
     resetSelectedChamps (state){
-      state.red = {};
-      state. blue = {};
+      //RESET CHAMPDATA STATE
+    },
+    setSides (state, playerSide){
+      state.playerSide = playerSide;
+      state.enemySide = playerSide === 'red' ? 'blue' : 'red';
+    },
+    updateEnemyChamp (state, selectedInfo){
+      state.champData[selectedInfo.champId].lanes = state.champData[selectedInfo.champId].lanes || [];
+
+      if(state.champData[selectedInfo.champId].lanes.includes(selectedInfo.lane)){
+        delete state.champData[selectedInfo.champId].potentialEnemySide;
+        let index = state.champData[selectedInfo.champId].lanes.indexOf(selectedInfo.lane);
+        if (index !== -1) {
+          state.champData[selectedInfo.champId].lanes.splice(index, 1);
+        }
+      }
+      else{
+        state.champData[selectedInfo.champId].potentialEnemySide = selectedInfo.potentialEnemySide;
+        state.champData[selectedInfo.champId].lanes.push(selectedInfo.lane);
+      }
+console.log(state.champData);
     }
   },
   actions: {
@@ -27,6 +43,12 @@ export default new Vuex.Store({
   getters: {
     getChampData: state => {
       return state.champData;
+    },
+    getPlayerSide: state => {
+      return state.playerSide;
+    },
+    getEnemySide: state => {
+      return state.enemySide;
     }
   }
 })
