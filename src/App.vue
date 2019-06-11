@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <div id="nav">
-      <div class="nav-title">🔵DraftTrainer™🔴</div>
+      <div class="nav-title">🔵 DraftTrainer™ 🔴</div>
       <div class="router-links-container">
         <router-link to="/">Home</router-link> |
         <router-link to="/about">About</router-link>

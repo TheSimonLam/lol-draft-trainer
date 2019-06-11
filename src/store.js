@@ -34,7 +34,6 @@ export default new Vuex.Store({
         state.champData[selectedInfo.champId].potentialEnemySide = selectedInfo.potentialEnemySide;
         state.champData[selectedInfo.champId].lanes.push(selectedInfo.lane);
       }
-console.log(state.champData);
     }
   },
   actions: {

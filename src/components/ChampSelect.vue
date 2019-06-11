@@ -28,7 +28,7 @@
 
     <div class="champ-select-box-container">
       <input placeholder="Enter champion name..." type="text" v-model="filterString">
-      <div class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index>
+      <div  class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index>
           <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champ.image.full" @click="playerPick(champ.id)">
         </div>
     </div>
@@ -63,13 +63,7 @@ export default {
       time: TIMER_DURATION,
       timer: '',
       blueTurn: true,
-      redTurn: false,
-      banPhase1: 0,
-      pickPhase1: 0,
-      banPhase2: 0,
-      pickPhase2: 0,
-      blueBans: [],
-      redBans: []
+      redTurn: false
     }
   },
   computed: {
@@ -87,82 +81,15 @@ export default {
     }
   },
   methods: {
-    blueIsBanning: function(){
-      if(this.playerSide === 'blue'){
-        this.waitPlayerBan().then((res) => {
-          this.blueBans.push(res);
-          this.banPhase += 1;
-          this.blueTurn = false;
-          this.redTurn = true;
-        });
-      }
-      else{
-        this.waitEnemyRandomBan().then((res) => {
-          this.blueBans.push(res);
-          this.banPhase += 1;
-          this.blueTurn = false;
-          this.redTurn = true;
-        });
-      }
-    },
-    redIsBanning: function(){
-      if(this.playerSide === 'blue'){
-        this.waitPlayerBan().then((res) => {
-          this.redBans.push(res);
-          this.banPhase += 1;
-          this.blueTurn = true;
-          this.redTurn = false;
-
-        });
-      }
-      else{
-        this.waitEnemyRandomBan().then((res) => {
-          this.redBans.push(res);
-          this.banPhase += 1;
-          this.blueTurn = true;
-          this.redTurn = false;
-        });
-      }
-    },
-    waitEnemyRandomBan: function(){
-      //Promise in here
-    },
-    waitEnemyRandomPick: function(){
-      //Promise in here
-    },
-    waitPlayerBan: function(){
-      //Promise in here
-    },
-    waitPlayerPick: function(){
-      //Promise in here
-    },
     startTimer: function(){
       this.timer = setInterval(() => {this.tick()}, 1000)
     },
     tick: function(){
       if(this.time === 0){
         this.removeTimer();
-        //Pick a blank champion (missed ban) or pick random champ
+        //Auto choose a random champ
       }
       else{
-        //Bulk of the game logic goes here
-        if(this.banPhase1 < 3){ //If we're in first ban phase
-          if(this.blueTurn){
-            this.blueIsBanning();
-          }
-          else{
-            this.redIsBanning();
-          }
-        }
-        else if(this.pickPhase1 < 3){ //If we're in first pick phase
-
-        }
-        else if(this.banPhase2 < 2){ //If we're in second ban phase
-
-        }
-        else if(this.pickPhase2 < 2){ //If we're in second pick phase
-
-        }
         this.time -= 1;
       }
     },
@@ -171,10 +98,22 @@ export default {
     },
     removeTimer: function(){
       clearInterval(this.timer);
+    },
+    generateRandomTime: function(){
+      return Math.floor((Math.random() * TIMER_DURATION) + 1);
+    },
+    waitForBlueBan: function(){
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve('🤡');
+        }, 2000);
+      });
     }
   },
-  created (){
-      this.startTimer();
+  async created (){
+      await this.waitForBlueBan();
+      console.log('Message');
+      console.log('boom');
   }
 }
 </script>
