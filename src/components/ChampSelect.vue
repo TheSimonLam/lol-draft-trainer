@@ -26,11 +26,11 @@
       <div class="picked-champ-container"><img class="picked-champ-img"></div>
     </div>
 
-    <div class="champ-select-box-container">
+    <div class="champ-select-box-container" v-bind:class="{ 'half-opacity': showChampSelectBox }">
       <input placeholder="Enter champion name..." type="text" v-model="filterString">
-      <div  class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index>
-          <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champ.image.full" @click="playerPick(champ.id)">
-        </div>
+      <div class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index @click="champSelected(champ.id)">
+          <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champ.image.full">
+      </div>
     </div>
 
     <div class="champs-container red-champs-container">
@@ -62,8 +62,10 @@ export default {
       config: pbConfig,
       time: TIMER_DURATION,
       timer: '',
+      pickedChecker: '',
       blueTurn: true,
-      redTurn: false
+      redTurn: false,
+      champPicked: false
     }
   },
   computed: {
@@ -78,6 +80,12 @@ export default {
         champ => champ.name.toLowerCase().indexOf(this.filterString.toLowerCase()) > -1
       )
       return this.champs;
+    },
+    showChampSelectBox(){
+      if((this.blueTurn && this.playerSide === "blue") || (this.redTurn && this.playerSide === "red")){
+        return false;
+      }
+      return true
     }
   },
   methods: {
@@ -86,33 +94,86 @@ export default {
     },
     tick: function(){
       if(this.time === 0){
-        this.removeTimer();
-        //Auto choose a random champ
+        //Auto choose a random champ for the player
+        this.champPicked = true;
       }
       else{
         this.time -= 1;
       }
     },
-    restartTimer: function(){
-      this.time = TIMER_DURATION;
-    },
-    removeTimer: function(){
+    removeTimers: function(){
       clearInterval(this.timer);
+      clearInterval(this.pickedChecker);
     },
     generateRandomTime: function(){
       return Math.floor((Math.random() * TIMER_DURATION) + 1);
     },
+    champSelected: function(champ){
+      this.champPicked = true;
+    },
+    resetTimersAndSwitchSides: function(){
+        this.champPicked = false;
+        this.blueTurn = !this.blueTurn;
+        this.redTurn = !this.redTurn;
+        this.time = TIMER_DURATION;
+        this.removeTimers();
+    },
     waitForBlueBan: function(){
       return new Promise(resolve => {
-        setTimeout(() => {
-          resolve('🤡');
-        }, 2000);
+        this.startTimer();
+        if(this.playerSide === "blue"){
+          this.pickedChecker = setInterval(() => {
+            if(this.champPicked){
+              this.resetTimersAndSwitchSides();
+              resolve();
+            }
+          }, 100)
+        }
+        else{
+          let randomPickTime = this.generateRandomTime();
+          this.pickedChecker = setInterval(() => {
+            if(this.time === randomPickTime){
+              //TODO: ADD RANDOM CHAMP DEPENDING ON THE CONFIG LIST
+              this.champPicked = true;
+              this.resetTimersAndSwitchSides();
+              resolve();
+            }
+          }, 100)
+        }
+      });
+    },
+    waitForRedBan: function(){
+      return new Promise(resolve => {
+        this.startTimer();
+        if(this.playerSide === "red"){
+          this.pickedChecker = setInterval(() => {
+            if(this.champPicked){
+              this.resetTimersAndSwitchSides();
+              resolve();
+            }
+          }, 100)
+        }
+        else{
+          let randomPickTime = this.generateRandomTime();
+          this.pickedChecker = setInterval(() => {
+            if(this.time === randomPickTime){
+              //TODO: ADD RANDOM CHAMP DEPENDING ON THE CONFIG LIST
+              this.champPicked = true;
+              this.resetTimersAndSwitchSides();
+              resolve();
+            }
+          }, 100)
+        }
       });
     }
   },
   async created (){
       await this.waitForBlueBan();
-      console.log('Message');
+      await this.waitForRedBan();
+      await this.waitForBlueBan();
+      await this.waitForRedBan();
+      await this.waitForBlueBan();
+      await this.waitForRedBan();
       console.log('boom');
   }
 }
@@ -224,5 +285,9 @@ export default {
     font-weight: bold;
     padding: 5px 0;
     border: 0;
+  }
+
+  .half-opacity{
+    opacity: 0.5;
   }
 </style>
