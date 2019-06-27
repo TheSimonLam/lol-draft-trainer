@@ -207,7 +207,6 @@ export default {
       });
     },
     enemyBanRandomChampFromConfig: function(){
-      //Do array here
       let randomArrPos = Math.floor((Math.random() * this.config.likelyPlayerPicks.length));
 
       for (let champ in this.champData) {
@@ -288,12 +287,12 @@ export default {
     width: 20%;
   }
 
-  .blue-champs-container{
+  .red-champs-container{
     float: right;
     background: $red1;
   }
 
-  .red-champs-container{
+  .blue-champs-container{
     float: left;
     background: $blue1
   }
