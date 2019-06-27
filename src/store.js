@@ -20,20 +20,31 @@ export default new Vuex.Store({
       state.playerSide = playerSide;
       state.enemySide = playerSide === 'red' ? 'blue' : 'red';
     },
-    updateEnemyChamp (state, selectedInfo){
-      state.champData[selectedInfo.champId].lanes = state.champData[selectedInfo.champId].lanes || [];
+    updatePotentialEnemyChampPick (state, info){
+      state.champData[info.champId].lanes = state.champData[info.champId].lanes || [];
 
-      if(state.champData[selectedInfo.champId].lanes.includes(selectedInfo.lane)){
-        delete state.champData[selectedInfo.champId].potentialEnemySide;
-        let index = state.champData[selectedInfo.champId].lanes.indexOf(selectedInfo.lane);
+      if(state.champData[info.champId].lanes.includes(info.lane)){
+        delete state.champData[info.champId].potentialEnemySide;
+        let index = state.champData[info.champId].lanes.indexOf(info.lane);
         if (index !== -1) {
-          state.champData[selectedInfo.champId].lanes.splice(index, 1);
+          state.champData[info.champId].lanes.splice(index, 1);
         }
       }
       else{
-        state.champData[selectedInfo.champId].potentialEnemySide = selectedInfo.potentialEnemySide;
-        state.champData[selectedInfo.champId].lanes.push(selectedInfo.lane);
+        state.champData[info.champId].potentialEnemySide = info.potentialEnemySide;
+        state.champData[info.champId].lanes.push(info.lane);
       }
+    },
+    updateChamp (state, info){
+      state.champData[info.champId].side = info.side;
+
+      if(info.banned){
+        state.champData[info.champId].banned = true;
+      }
+      else{
+        state.champData[info.champId].picked = true;
+      }
+      console.log(state);
     }
   },
   actions: {

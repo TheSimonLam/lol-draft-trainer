@@ -28,8 +28,8 @@
 
     <div class="champ-select-box-container" v-bind:class="{ 'half-opacity': showChampSelectBox }">
       <input placeholder="Enter champion name..." type="text" v-model="filterString">
-      <div class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index @click="champSelected(champ.id)">
-          <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champ.image.full">
+      <div class="champ-box-image-container" v-for="(champ, index) in filteredChamps" v-bind:key=index @click="champSelected(champ.id, false)">
+          <img class="champ-box-image" v-if="!champ.banned && !champ.picked" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champ.image.full">
       </div>
     </div>
 
@@ -42,7 +42,17 @@
     </div>
 
     <div class="ban-bar-container">
+      <div class="bans-container">
+        <div class="champ-box-image-container" v-for="(champImg, index) in (playerSide === 'blue' ? playerBanImageUrlsArray : enemyBanImageUrlsArray)" v-bind:key=index>
+            <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champImg + '.png'">
+        </div>
+      </div>
 
+      <div class="bans-container">
+        <div class="champ-box-image-container" v-for="(champImg, index) in (playerSide === 'red' ? playerBanImageUrlsArray : enemyBanImageUrlsArray)" v-bind:key=index>
+            <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champImg + '.png'">
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -51,7 +61,7 @@
 import store from '../store';
 import { mapGetters } from 'vuex'
 import pbConfig from "../pb-config";
-const TIMER_DURATION = 5;
+const TIMER_DURATION = 10;
 
 export default {
   name: 'ChampSelect',
@@ -65,7 +75,12 @@ export default {
       pickedChecker: '',
       blueTurn: true,
       redTurn: false,
-      champPicked: false
+      champPicked: false,
+      inBanPhase: true,
+      enemyBanImageUrlsArray: [],
+      playerBanImageUrlsArray: [],
+      enemyPicksImageUrlsArray: [],
+      enemyBansImageUrlsArray: [],
     }
   },
   computed: {
@@ -105,11 +120,36 @@ export default {
       clearInterval(this.timer);
       clearInterval(this.pickedChecker);
     },
-    generateRandomTime: function(){
-      return Math.floor((Math.random() * TIMER_DURATION) + 1);
+    generateRandomEnemyTime: function(){
+      let randomTime = Math.floor((Math.random() * TIMER_DURATION) + 1);
+      return randomTime > (TIMER_DURATION - 3) ? randomTime - 4 : randomTime;
     },
-    champSelected: function(champ){
-      this.champPicked = true;
+    champSelected: function(champ, isEnemySelection){
+      if(!this.champPicked){
+        this.champPicked = true;
+
+        if(isEnemySelection){
+          this.enemyBanImageUrlsArray.push(champ);
+        }
+        else{
+          this.playerBanImageUrlsArray.push(champ);
+        }
+
+        let info = {
+          champId: champ
+        };
+
+        if(this.inBanPhase){
+          info.banned = true;
+          info.side = isEnemySelection ? this.enemySide : this.playerSide;
+        }
+        else{
+          info.picked = true;
+          info.side = isEnemySelection ? this.enemySide : this.playerSide;
+        }
+
+        store.commit('updateChamp', info);
+      }
     },
     resetTimersAndSwitchSides: function(){
         this.champPicked = false;
@@ -130,10 +170,10 @@ export default {
           }, 100)
         }
         else{
-          let randomPickTime = this.generateRandomTime();
+          let randomPickTime = this.generateRandomEnemyTime();
           this.pickedChecker = setInterval(() => {
             if(this.time === randomPickTime){
-              //TODO: ADD RANDOM CHAMP DEPENDING ON THE CONFIG LIST
+              this.champSelected(this.enemyBanRandomChampFromConfig(), true);
               this.champPicked = true;
               this.resetTimersAndSwitchSides();
               resolve();
@@ -154,10 +194,10 @@ export default {
           }, 100)
         }
         else{
-          let randomPickTime = this.generateRandomTime();
+          let randomPickTime = this.generateRandomEnemyTime();
           this.pickedChecker = setInterval(() => {
             if(this.time === randomPickTime){
-              //TODO: ADD RANDOM CHAMP DEPENDING ON THE CONFIG LIST
+              this.champSelected(this.enemyBanRandomChampFromConfig(), true);
               this.champPicked = true;
               this.resetTimersAndSwitchSides();
               resolve();
@@ -165,6 +205,19 @@ export default {
           }, 100)
         }
       });
+    },
+    enemyBanRandomChampFromConfig: function(){
+      //Do array here
+      let randomArrPos = Math.floor((Math.random() * this.config.likelyPlayerPicks.length));
+
+      for (let champ in this.champData) {
+        if (this.champData.hasOwnProperty(champ)) {
+          if(champ === this.config.likelyPlayerPicks[randomArrPos] && !this.champData[champ].banned){
+            return champ;
+          }
+        }
+      }
+      return this.enemyBanRandomChampFromConfig();
     }
   },
   async created (){
@@ -174,6 +227,8 @@ export default {
       await this.waitForRedBan();
       await this.waitForBlueBan();
       await this.waitForRedBan();
+      this.banPhase = false;
+      console.log(this.champData);
       console.log('boom');
   }
 }
@@ -289,5 +344,10 @@ export default {
 
   .half-opacity{
     opacity: 0.5;
+  }
+
+  .bans-container{
+    width: 50%;
+    display: inline-block;
   }
 </style>

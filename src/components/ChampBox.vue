@@ -38,12 +38,12 @@ export default {
   },
   methods: {
     champSelected: function(champId){
-      let selectedInfo = {
+      let info = {
         potentialEnemySide: this.side,
         lane: this.lane,
         champId: champId
       };
-      store.commit('updateEnemyChamp', selectedInfo);
+      store.commit('updatePotentialEnemyChampPick', info);
       this.$forceUpdate();
     }
   }

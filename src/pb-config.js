@@ -13,5 +13,6 @@ export default {
         thirdPickRole: "jungle",
         fourthPickRole: "top",
         fifthPickRole: "mid"
-    }
+    },
+    likelyPlayerPicks: ["Blitzcrank", "Fiora", "Lucian", "Braum", "Kennen", "Fiddlesticks", "Janna", "Leona", "Thresh", "Jayce", "Darius"]
 }
