@@ -1,5 +1,9 @@
 <template>
   <div class="champ-sel-container">
+    <div class="error-no-champ-overlay" v-if="errorNoChampPicked">
+      <div>You failed to select a champion on time!</div>
+      <button class="restart-btn" @click="playAgain">Restart</button>
+    </div>
     <div class="champ-sel-header">
       <div class="header-section blue-side">
         <span v-if="playerSide ==='blue'" class="side-title">YOU</span>
@@ -49,6 +53,8 @@
             <img class="champ-box-image" :src="'http://ddragon.leagueoflegends.com/cdn/' + config.version + '/img/champion/' + champImg + '.png'">
         </div>
       </div>
+
+      <button class="restart-btn" v-if="!isPlayersTurn" @click="playAgain">Restart</button>
     </div>
   </div>
 </template>
@@ -78,6 +84,7 @@ export default {
       playerBansImageUrlsArray: [],
       enemyPicksImageUrlsArray: [],
       playerPicksImageUrlsArray: [],
+      errorNoChampPicked: false
     }
   },
   computed: {
@@ -106,14 +113,14 @@ export default {
     },
     tick: function(){
       if(this.time === 0){
-        //Auto choose a random champ for the player
-        this.numChampsSelected = 1;
+        this.errorNoChampPicked = true;
       }
       else{
         this.time -= 1;
       }
     },
     removeTimers: function(){
+      this.time = TIMER_DURATION;
       clearInterval(this.timer);
       clearInterval(this.pickedChecker);
     },
@@ -123,7 +130,7 @@ export default {
     },
     champSelected: function(isEnemySelection, champId){
       if(!isEnemySelection && this.isPlayersTurn){return;}
-      let generatedChampId = this.isBanPhase ? this.enemyBanRandomChampFromConfig() : this.enemyBanRandomChampFromConfig(); //TODO SORT THIS OUT 
+      let generatedChampId = isEnemySelection ? this.isBanPhase ? this.enemyBanRandomChampFromConfig() : this.enemyPickRandomChampFromConfig() : null;
       this.numChampsSelected += 1;
 
       let info = {
@@ -158,7 +165,6 @@ export default {
     resetTimersAndSwitchSides: function(){
         this.blueTurn = !this.blueTurn;
         this.redTurn = !this.redTurn;
-        this.time = TIMER_DURATION;
         this.numChampsToSelect = 1;
         this.numChampsSelected = 0;
         this.removeTimers();
@@ -189,7 +195,6 @@ export default {
       this.pickedChecker = setInterval(() => {
         if(this.time === randomPickTime){
           if(this.numChampsToSelect === 2){
-            console.log('red turn1');
             this.champSelected(true);
             this.champSelected(true);
           }
@@ -211,20 +216,53 @@ export default {
         }
       }
       return this.enemyBanRandomChampFromConfig();
-    }
-  },
-  async created (){
-      // await this.startRound('blue', true, 1); // (side, isBanPhase, numChampsToSelect)
-      // await this.startRound('red', true, 1);
-      // await this.startRound('blue', true, 1);
-      // await this.startRound('red', true, 1);
-      // await this.startRound('blue', true, 1);
-      // await this.startRound('red', true, 1);
+    },
+    enemyPickRandomChampFromConfig: function(){
+      let priorityConfig = this.enemySide === "red" ? pbConfig.redConfig.priorityLanes : pbConfig.blueConfig.priorityLanes,
+          priorityLane = priorityConfig[this.enemyPicksImageUrlsArray.length],
+          potentialChampsArray = [];
 
-      await this.startRound('blue', false, 1);
-      await this.startRound('red', false, 2);
-      await this.startRound('blue', false, 2);
-      await this.startRound('red', false, 1);
+      for (let champ in this.champData) {
+        if (this.champData.hasOwnProperty(champ) && this.champData[champ].potentialEnemySide && this.champData[champ].lanes) {
+          for(let i=0;i<this.champData[champ].lanes.length;i++){
+            if(this.champData[champ].lanes[i] === priorityLane && !this.champData[champ].banned && !this.champData[champ].picked){
+              potentialChampsArray.push(this.champData[champ].name);
+            }
+          }
+        }
+      }
+
+      // TODO: SORT OUT WHAT HAPPENS WHERE THERE ARE NO CHAMPS LEFT TO PICK maybe put in validation?
+
+      let randomArrPos = Math.floor((Math.random() * potentialChampsArray.length));
+      return potentialChampsArray[randomArrPos];
+    },
+    play: async function(){
+      // await this.startRound('blue', true, 1); // (side, isBanPhase, numChampsToSelect)
+        // await this.startRound('red', true, 1);
+        // await this.startRound('blue', true, 1);
+        // await this.startRound('red', true, 1);
+        // await this.startRound('blue', true, 1);
+        // await this.startRound('red', true, 1);
+
+        await this.startRound('blue', false, 1);
+        await this.startRound('red', false, 2);
+        await this.startRound('blue', false, 2);
+        await this.startRound('red', false, 1);
+    },
+    playAgain: function(){
+      this.errorNoChampPicked = false;
+      this.enemyBansImageUrlsArray = [];
+      this.playerBansImageUrlsArray = [];
+      this.enemyPicksImageUrlsArray = [];
+      this.playerPicksImageUrlsArray = [];
+      this.removeTimers();
+      store.commit('resetSelectedChamps'); //might not have to do this
+      this.play();
+    },
+  },
+  created (){
+      this.play();
   }
 }
 </script>
@@ -348,5 +386,26 @@ export default {
   .bans-container{
     width: 50%;
     display: inline-block;
+  }
+
+  .error-no-champ-overlay{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    color: white;
+    text-align: center;
+    background: red;
+    font-size: 2em;
+    line-height: 400px;
+    z-index: 1;
+  }
+
+  .restart-btn{
+    border: 0;
+    border-radius: 5px;
+    color: black;
+    width: 100px;
+    font-weight: bold;
+    height: 30px;
   }
 </style>

@@ -1,18 +1,10 @@
 export default {
     version: "9.10.1",
     blueConfig: {
-        firstPickRole: "mid",
-        secondPickRole: "top",
-        thirdPickRole: "jungle",
-        fourthPickRole: "adc",
-        fifthPickRole: "support"
+        priorityLanes: ["mid", "top", "jungle", "adc", "support"]
     },
-    blueConfig: {
-        firstPickRole: "adc",
-        secondPickRole: "support",
-        thirdPickRole: "jungle",
-        fourthPickRole: "top",
-        fifthPickRole: "mid"
+    redConfig: {
+        priorityLanes: ["adc", "support", "jungle", "top", "mid"]
     },
     likelyPlayerPicks: ["Blitzcrank", "Fiora", "Lucian", "Braum", "Kennen", "Fiddlesticks", "Janna", "Leona", "Thresh", "Jayce", "Darius"]
 }

@@ -44,7 +44,6 @@ export default new Vuex.Store({
       else{
         state.champData[info.champId].picked = true;
       }
-      console.log(state);
     }
   },
   actions: {
