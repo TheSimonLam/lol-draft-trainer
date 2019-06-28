@@ -63,7 +63,7 @@
 import store from '../store';
 import { mapGetters } from 'vuex'
 import pbConfig from "../pb-config";
-const TIMER_DURATION = 10;
+const TIMER_DURATION = 5;
 
 export default {
   name: 'ChampSelect',
@@ -77,6 +77,7 @@ export default {
       pickedChecker: '',
       blueTurn: true,
       redTurn: false,
+      previousSideTurn: "blue",
       inBanPhase: true,
       numChampsToSelect: 1,
       numChampsSelected: 0,
@@ -130,7 +131,8 @@ export default {
     },
     champSelected: function(isEnemySelection, champId){
       if(!isEnemySelection && this.isPlayersTurn){return;}
-      let generatedChampId = isEnemySelection ? this.isBanPhase ? this.enemyBanRandomChampFromConfig() : this.enemyPickRandomChampFromConfig() : null;
+      let generatedChampId = isEnemySelection ? this.inBanPhase ? this.enemyBanRandomChampFromConfig() : this.enemyPickRandomChampFromConfig() : null;
+
       this.numChampsSelected += 1;
 
       let info = {
@@ -162,35 +164,42 @@ export default {
 
       store.commit('updateChamp', info);
     },
-    resetTimersAndSwitchSides: function(){
-        this.blueTurn = !this.blueTurn;
-        this.redTurn = !this.redTurn;
+    resetTimers: function(){
         this.numChampsToSelect = 1;
         this.numChampsSelected = 0;
         this.removeTimers();
     },
+    checkSwitchSides: function(side){
+        if(this.previousSideTurn !== side){
+            this.previousSideTurn = side;
+            this.blueTurn = !this.blueTurn;
+            this.redTurn = !this.redTurn;
+        }
+    },
     startRound: function(side, isBanPhase, numChampsToSelect){
+      this.checkSwitchSides(side);
       this.numChampsToSelect = numChampsToSelect;
       this.inBanPhase = isBanPhase;
+
       return new Promise(resolve => {
         this.startTimer();
         if(this.playerSide === side){
-          this.waitForPlayer(resolve);
+          this.waitForPlayer(resolve, side);
         }
         else{
-          this.waitForEnemy(resolve);
+          this.waitForEnemy(resolve, side);
         }
       });
     },
-    waitForPlayer: function(resolve){
+    waitForPlayer: function(resolve, side){
       this.pickedChecker = setInterval(() => {
         if(this.numChampsSelected === this.numChampsToSelect){
-          this.resetTimersAndSwitchSides();
+          this.resetTimers();
           resolve();
         }
       }, 100)
     },
-    waitForEnemy: function(resolve){
+    waitForEnemy: function(resolve, side){
       let randomPickTime = this.generateRandomEnemyTime();
       this.pickedChecker = setInterval(() => {
         if(this.time === randomPickTime){
@@ -201,7 +210,7 @@ export default {
           else{
             this.champSelected(true);
           }
-          this.resetTimersAndSwitchSides();
+          this.resetTimers();
           resolve();
         }
       }, 100)
@@ -210,7 +219,7 @@ export default {
       let randomArrPos = Math.floor((Math.random() * this.config.likelyPlayerPicks.length));
       for (let champ in this.champData) {
         if (this.champData.hasOwnProperty(champ)) {
-          if(champ === this.config.likelyPlayerPicks[randomArrPos] && !this.champData[champ].banned){
+          if(champ === this.config.likelyPlayerPicks[randomArrPos] && !this.champData[champ].banned && !this.champData[champ].picked){
             return champ;
           }
         }
@@ -226,29 +235,50 @@ export default {
         if (this.champData.hasOwnProperty(champ) && this.champData[champ].potentialEnemySide && this.champData[champ].lanes) {
           for(let i=0;i<this.champData[champ].lanes.length;i++){
             if(this.champData[champ].lanes[i] === priorityLane && !this.champData[champ].banned && !this.champData[champ].picked){
-              potentialChampsArray.push(this.champData[champ].name);
+              potentialChampsArray.push(this.champData[champ].id);
             }
           }
         }
       }
 
-      // TODO: SORT OUT WHAT HAPPENS WHERE THERE ARE NO CHAMPS LEFT TO PICK maybe put in validation?
+      if(potentialChampsArray.length === 0){
+        for (let champ in this.champData) {
+          if(!this.champData[champ].banned && !this.champData[champ].picked){
+            potentialChampsArray.push(this.champData[champ].id);
+          }
+        }
+      }
 
       let randomArrPos = Math.floor((Math.random() * potentialChampsArray.length));
       return potentialChampsArray[randomArrPos];
     },
     play: async function(){
-      // await this.startRound('blue', true, 1); // (side, isBanPhase, numChampsToSelect)
-        // await this.startRound('red', true, 1);
-        // await this.startRound('blue', true, 1);
-        // await this.startRound('red', true, 1);
-        // await this.startRound('blue', true, 1);
-        // await this.startRound('red', true, 1);
+        // Ban Phase 1
+        await this.startRound('blue', true, 1); // (side, isBanPhase, numChampsToSelect)
+        await this.startRound('red', true, 1);
+        await this.startRound('blue', true, 1);
+        await this.startRound('red', true, 1);
+        await this.startRound('blue', true, 1);
+        await this.startRound('red', true, 1);
 
+        // Pick Phase 1
         await this.startRound('blue', false, 1);
         await this.startRound('red', false, 2);
         await this.startRound('blue', false, 2);
         await this.startRound('red', false, 1);
+
+        // // Ban Phase 2
+        await this.startRound('red', true, 1);
+        await this.startRound('blue', true, 1);
+        await this.startRound('red', true, 1);
+        await this.startRound('blue', true, 1);
+
+        // Pick Phase 2
+        await this.startRound('red', false, 1);
+        await this.startRound('blue', false, 2);
+        await this.startRound('red', false, 1);
+
+        this.time = '';
     },
     playAgain: function(){
       this.errorNoChampPicked = false;
@@ -336,8 +366,8 @@ export default {
   }
 
   .ban-bar-container{
-    height: 100px;
     background: $blue3;
+    min-height: 150px;
   }
 
   .picked-champ-container{
