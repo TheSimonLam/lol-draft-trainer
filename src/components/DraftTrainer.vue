@@ -70,14 +70,6 @@ export default {
     ])
   },
   methods: {
-    init: function(){
-      // RESET ALL VARIABLES HERE!
-      // CLEAN THE CHAMPDATA{}
-      store.commit('resetSelectedChamps');
-    },
-    replay: function(){
-      //Play again, with same enemy champs and configs
-    },
     setPlaying: function(){
       this.playing = !this.playing;
     },
@@ -98,7 +90,6 @@ export default {
   },
   created (){
     setTimeout(() =>{document.getElementsByClassName("select-side-container")[0].className += " opacity-fade-in";}, 500);
-    this.init();
   }
 }
 </script>

@@ -13,8 +13,14 @@ export default new Vuex.Store({
     setChampData (state, champData) {
       state.champData = champData;
     },
-    resetSelectedChamps (state){
-      //RESET CHAMPDATA STATE
+    resetChamps (state){
+      for (let champ in state.champData) {
+        if (state.champData.hasOwnProperty(champ)) {
+          delete state.champData[champ].picked;
+          delete state.champData[champ].banned;
+          delete state.champData[champ].side;
+        }
+      }
     },
     setSides (state, playerSide){
       state.playerSide = playerSide;

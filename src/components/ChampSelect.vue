@@ -54,7 +54,7 @@
         </div>
       </div>
 
-      <button class="restart-btn" v-if="!isPlayersTurn" @click="playAgain">Restart</button>
+      <button class="restart-btn" @click="playAgain">Restart</button>
     </div>
   </div>
 </template>
@@ -63,7 +63,7 @@
 import store from '../store';
 import { mapGetters } from 'vuex'
 import pbConfig from "../pb-config";
-const TIMER_DURATION = 5;
+const TIMER_DURATION = 27;
 
 export default {
   name: 'ChampSelect',
@@ -287,7 +287,7 @@ export default {
       this.enemyPicksImageUrlsArray = [];
       this.playerPicksImageUrlsArray = [];
       this.removeTimers();
-      store.commit('resetSelectedChamps'); //might not have to do this
+      store.commit('resetChamps');
       this.play();
     },
   },
