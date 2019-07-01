@@ -26,13 +26,13 @@
         </div>
 
         <div  class="container">
-          <div class="container-text">Please select potential enemy <span class="red">support</span>:</div>
-          <ChampBox v-bind:side="getEnemySide" lane="support"></ChampBox>
+          <div class="container-text">Please select potential enemy <span class="red">ADCs</span>:</div>
+          <ChampBox v-bind:side="getEnemySide" lane="adc"></ChampBox>
         </div>
 
         <div  class="container">
-          <div class="container-text">Please select potential enemy <span class="red">ADCs</span>:</div>
-          <ChampBox v-bind:side="getEnemySide" lane="adc"></ChampBox>
+          <div class="container-text">Please select potential enemy <span class="red">support</span>:</div>
+          <ChampBox v-bind:side="getEnemySide" lane="support"></ChampBox>
         </div>
 
         <button class="start-button" @click="setPlaying">Start</button>
