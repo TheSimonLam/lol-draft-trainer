@@ -1,12 +1,37 @@
 export default {
     version: "9.10.1",
     blueConfig: {
-        priorityLanes: ["mid", "top", "jungle", "adc", "support"]
+        priorityLanes: ["adc", "top", "mid", "jungle", "support"]
     },
     redConfig: {
-        priorityLanes: ["adc", "support", "jungle", "top", "mid"]
+        priorityLanes: ["support", "jungle", "adc", "mid", "top"]
     },
-    likelyPlayerPicks: ["Blitzcrank", "Fiora", "Lucian", "Braum", "Kennen", "Fiddlesticks", "Janna", "Leona", "Thresh", "Jayce", "Darius"]
+    likelyPlayerPicks: [
+        "Aatrox",
+        "Jayce",
+        "Sylas",
+        "Irelia",
+        "Ryze",
+        "Kennen",
+        "LeeSin",
+        "Elise",
+        "JarvanIV",
+        "Akali",
+        "Leblanc",
+        "Vladimir",
+        "Corki",
+        "Yasuo",
+        "Kaisa",
+        "RekSai",
+        "Karthus",
+        "Sivir",
+        "Thresh",
+        "Nautilus",
+        "Rakan",
+        "Lux",
+        "Sona",
+        "Yuumi"
+    ]
 }
 
 // TODO: ADD THIS SO THEY DONT DOUBLE BAN
