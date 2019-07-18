@@ -1,5 +1,5 @@
 export default {
-    version: "9.10.1",
+    version: "9.14.1",
     blueConfig: {
         priorityLanes: ["adc", "top", "mid", "jungle", "support"]
     },
