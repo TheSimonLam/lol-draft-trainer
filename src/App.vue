@@ -4,7 +4,8 @@
       <div class="nav-title">🔵 DraftTrainer™ 🔴</div>
       <div class="router-links-container">
         <router-link to="/">Home</router-link> |
-        <router-link to="/about">About</router-link>
+        <router-link to="/about">About</router-link> |
+        <a href="https://youtu.be/D8S6hJrypHQ" target="_blank">🔈Music</a>
       </div>
     </div>
     <router-view/>
